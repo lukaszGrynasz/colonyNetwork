@@ -2,11 +2,33 @@ import ReputationMiningClient from "../ReputationMiner";
 
 const ethers = require("ethers");
 
-class MaliciousReputationMiningWrongProofLogEntry extends ReputationMiningClient {
-  // This client will supply the wrong log entry as part of its proof
-  constructor(opts, amountToFalsify) {
+class MaliciousReputationMiningWrongOriginReputation extends ReputationMiningClient {
+  // This client will claim there is no originReputationUID, whether there is one or not
+  //
+  constructor(opts, entryToFalsify, amountToFalsify) {
     super(opts);
-    this.amountToFalsify = amountToFalsify.toString();
+    this.entryToFalsify = entryToFalsify;
+    // Amount to falsify here isn't really the amount the origin reputation is wrong by, it's how wrong
+    // we get the lookup index.
+    this.amountToFalsify = amountToFalsify;
+  }
+
+  async addSingleReputationUpdate(updateNumber, repCycle, blockNumber, checkForReplacement) {
+    if (updateNumber.toNumber() === this.entryToFalsify){
+      this.alterThisEntry = true;
+    }
+    await super.addSingleReputationUpdate(updateNumber, repCycle, blockNumber, checkForReplacement)
+    this.alterThisEntry = false;
+  }
+
+  async getKeyForUpdateNumber(updateNumber){
+    if (this.alterThisEntry){
+      if (updateNumber.toNumber() > this.entryToFalsify){
+        // Then we're trying to look up an origin skill
+        return super.getKeyForUpdateNumber(updateNumber.toNumber() - this.amountToFalsify);
+      }
+    }
+    return super.getKeyForUpdateNumber(updateNumber);
   }
 
   async respondToChallenge() {
@@ -17,16 +39,15 @@ class MaliciousReputationMiningWrongProofLogEntry extends ReputationMiningClient
     const firstDisagreeIdx = submission[8];
     const lastAgreeIdx = firstDisagreeIdx.sub(1);
     const reputationKey = await this.getKeyForUpdateNumber(lastAgreeIdx);
-    const lastAgreeKey = MaliciousReputationMiningWrongProofLogEntry.getHexString(lastAgreeIdx, 64);
-    const firstDisagreeKey = MaliciousReputationMiningWrongProofLogEntry.getHexString(firstDisagreeIdx, 64);
+    const lastAgreeKey = ReputationMiningClient.getHexString(lastAgreeIdx, 64);
+    const firstDisagreeKey = ReputationMiningClient.getHexString(firstDisagreeIdx, 64);
 
     const [agreeStateBranchMask, agreeStateSiblings] = await this.justificationTree.getProof(lastAgreeKey);
     const [disagreeStateBranchMask, disagreeStateSiblings] = await this.justificationTree.getProof(firstDisagreeKey);
     let logEntryNumber = ethers.utils.bigNumberify(0);
     if (lastAgreeIdx.gte(this.nReputationsBeforeLatestLog)) {
-      logEntryNumber = await this.getLogEntryNumberForLogUpdateNumber(lastAgreeIdx.sub(this.nReputationsBeforeLatestLog));
+      logEntryNumber = await this.getLogEntryNumberForLogUpdateNumber(lastAgreeIdx);
     }
-    logEntryNumber = logEntryNumber.add(this.amountToFalsify);
 
     const tx = await repCycle.respondToChallenge(
       [
@@ -34,9 +55,9 @@ class MaliciousReputationMiningWrongProofLogEntry extends ReputationMiningClient
         index,
         this.justificationHashes[firstDisagreeKey].justUpdatedProof.branchMask,
         this.justificationHashes[lastAgreeKey].nextUpdateProof.nNodes,
-        MaliciousReputationMiningWrongProofLogEntry.getHexString(agreeStateBranchMask),
+        ReputationMiningClient.getHexString(agreeStateBranchMask),
         this.justificationHashes[firstDisagreeKey].justUpdatedProof.nNodes,
-        MaliciousReputationMiningWrongProofLogEntry.getHexString(disagreeStateBranchMask),
+        ReputationMiningClient.getHexString(disagreeStateBranchMask),
         this.justificationHashes[lastAgreeKey].newestReputationProof.branchMask,
         logEntryNumber,
         "0",
@@ -47,8 +68,8 @@ class MaliciousReputationMiningWrongProofLogEntry extends ReputationMiningClient
         this.justificationHashes[firstDisagreeKey].justUpdatedProof.uid,
         this.justificationHashes[lastAgreeKey].newestReputationProof.reputation,
         this.justificationHashes[lastAgreeKey].newestReputationProof.uid,
-        this.justificationHashes[lastAgreeKey].originReputationProof.reputation,
-        this.justificationHashes[lastAgreeKey].originReputationProof.uid,
+        "0x0",
+        "0x0"
       ],
       reputationKey,
       this.justificationHashes[firstDisagreeKey].justUpdatedProof.siblings,
@@ -64,4 +85,4 @@ class MaliciousReputationMiningWrongProofLogEntry extends ReputationMiningClient
   }
 }
 
-export default MaliciousReputationMiningWrongProofLogEntry;
+export default MaliciousReputationMiningWrongOriginReputation;

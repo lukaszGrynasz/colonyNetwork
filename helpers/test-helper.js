@@ -115,7 +115,7 @@ export async function checkErrorRevert(promise, errorMessage) {
     assert.equal(reason, errorMessage);
   }
   // Check the receipt `status` to ensure transaction failed.
-  assert.equal(receipt.status, 0x00, `Transaction succeeded, but expected error ${errorMessage}`);
+  assert.isFalse(receipt.status, `Transaction succeeded, but expected error ${errorMessage}`);
 }
 
 export function getRandomString(_length) {
@@ -188,7 +188,7 @@ export async function forwardTime(seconds, test) {
     if (client.indexOf("TestRPC") === -1) {
       resolve(test.skip());
     } else {
-      console.log(`Forwarding time with ${seconds}s ...`);
+      // console.log(`Forwarding time with ${seconds}s ...`);
       web3.currentProvider.send(
         {
           jsonrpc: "2.0",
@@ -311,8 +311,8 @@ export function makeReputationKey(colonyAddress, skill, accountAddress = undefin
 }
 
 // Note: value can be anything with a `.toString()` method -- a string, number, or BN.
-export function makeReputationValue(value, repuationId) {
-  return `0x${(new BN(value.toString())).toString(16, 64)}${(new BN(repuationId)).toString(16, 64)}`; // eslint-disable-line
+export function makeReputationValue(value, reputationId) {
+  return `0x${(new BN(value.toString())).toString(16, 64)}${(new BN(reputationId)).toString(16, 64)}`; // eslint-disable-line
 }
 
 export async function getValidEntryNumber(colonyNetwork, account, hash, startingEntryNumber = 1) {

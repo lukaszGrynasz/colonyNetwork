@@ -21,6 +21,12 @@ pragma experimental "v0.5.0";
 
 contract IReputationMiningCycle {
 
+  /// @notice Event logged when a reputation UID is proven to be correct in a challenge
+  event ProveUIDSuccess(uint256 previousNewReputationUID, uint256 _disagreeStateReputationUID, bool existingUID);
+
+  /// @notice Event logged when a reputation value is proven to be correct in a challenge
+  event ProveValueSuccess(int256 _agreeStateReputationValue, int256 _disagreeStateReputationValue, int256 _originReputationValue);
+
   /// @notice The getter for the disputeRounds mapping of array of dispute rounds.
   /// @param _round The dispute round to query
   /// @param _index The index in the dispute round to query
@@ -112,32 +118,39 @@ contract IReputationMiningCycle {
   /// * 6. The number of nodes this hash considers to be present in the first reputation state the two hashes in this challenge disagree on
   /// * 7. The branchMask of the proof that reputation root hash of the first reputation state the two hashes in this challenge disagree on is in this submitted hash's justification tree
   /// * 8. The branchMask of the proof for the most recently added reputation state in this hash's state tree in the last reputation state the two hashes in this challenge agreed on
-  /// * 9. A dummy variable that should be set to 0. If nonzero, transaction will still work but be slightly more expensive. For an explanation of why this is present, look at the corresponding solidity code.
-  /// *10. The index of the log entry that the update in question was implied by. Each log entry can imply multiple reputation updates, and so we expect the clients to pass
+  /// * 9. The index of the log entry that the update in question was implied by. Each log entry can imply multiple reputation updates, and so we expect the clients to pass
   ///      the log entry index corresponding to the update to avoid us having to iterate over the log.
-  /// *11. A dummy variable that should be set to 0. If nonzero, transaction will still work but be slightly more expensive. For an explanation of why this is present, look at the corresponding solidity code.
+  /// *10. A dummy variable that should be set to 0. If nonzero, transaction will still work but be slightly more expensive. For an explanation of why this is present, look at the corresponding solidity code.
+  /// *11. Origin skill reputation branch mask. Nonzero for child reputation updates.
+  ///
+  /// * 12. The amount of reputation that the entry in the tree under dispute has in the agree state
+  /// * 13. The UID that the entry in the tree under dispute has in the agree state
+  /// * 14. The amount of reputation that the entry in the tree under dispute has in the disagree state
+  /// * 15. The UID that the entry in the tree under dispute has in the disagree state
+  /// * 16. The amount of reputation that the most recently added entry in the tree has in the state being disputed
+  /// * 17. The UID that the most recently added entry in the tree has in the state being disputed
+  /// * 18. The amount of reputation that the origin reputation entry in the tree has in the state being disputed
+  /// * 19. The UID that the origin reputation entry in the tree has in the state being disputed
   /// @param _reputationKey The key of the reputation being changed that the disagreement is over.
   /// @param reputationSiblings The siblings of the Merkle proof that the reputation corresponding to `_reputationKey` is in the reputation state before and after the disagreement
-  /// @param agreeStateReputationValue The value of the reputation at key `_reputationKey` in the last reputation state the submitted hashes agreed on
   /// @param agreeStateSiblings The siblings of the Merkle proof that the last reputation state the submitted hashes agreed on is in this submitted hash's justification tree
-  /// @param disagreeStateReputationValue The value of the reputation at key `_reputationKey` in the first reputation state the submitted hashes disagree on
   /// @param disagreeStateSiblings The siblings of the Merkle proof that the first reputation state the submitted hashes disagreed on is in this submitted hash's justification tree
   /// @param previousNewReputationKey The key of the newest reputation added to the reputation tree in the last reputation state the submitted hashes agree on
-  /// @param previousNewReputationValue The value of the newest reputation added to the reputation tree in the last reputation state the submitted hashes agree on
   /// @param previousNewReputationSiblings The siblings of the Merkle proof of the newest reputation added to the reputation tree in the last reputation state the submitted hashes agree on
+  /// @param originReputationKey Nonzero for child updates only. The key of the origin skill reputation added to the reputation tree in the last reputation state the submitted hashes agree on
+  /// @param originReputationSiblings Nonzero for child updates only. The siblings of the Merkle proof of the origin skill reputation added to the reputation tree in the last reputation state the submitted hashes agree on
   /// @dev If you know that the disagreement doesn't involve a new reputation being added, the arguments corresponding to the previous new reputation can be zeroed, as they will not be used. You must be sure
   /// that this is the case, however, otherwise you risk being found incorrect. Zeroed arguments will result in a cheaper call to this function.
   function respondToChallenge(
-    uint256[11] u, //An array of 10 UINT Params, ordered as given above.
+    uint256[19] u, //An array of 19 UINT Params, ordered as given above.
     bytes _reputationKey,
     bytes32[] reputationSiblings,
-    bytes agreeStateReputationValue,
     bytes32[] agreeStateSiblings,
-    bytes disagreeStateReputationValue,
     bytes32[] disagreeStateSiblings,
     bytes previousNewReputationKey,
-    bytes previousNewReputationValue,
-    bytes32[] previousNewReputationSiblings) public;
+    bytes32[] previousNewReputationSiblings,
+    bytes originReputationKey,
+    bytes32[] originReputationSiblings) public;
 
   /// @notice Submit the Justification Root Hash (JRH) for a submitted reputation hash.
   /// @param round The round that the hash is currently in.
@@ -169,11 +182,11 @@ contract IReputationMiningCycle {
   /// @param _nChildren The number of child skills the skill defined by the skillId has
   function appendReputationUpdateLog(
     address _user,
-    int _amount,
-    uint _skillId,
+    int256 _amount,
+    uint256 _skillId,
     address _colonyAddress,
-    uint _nParents,
-    uint _nChildren
+    uint256 _nParents,
+    uint256 _nChildren
     ) public;
 
   /// @notice Get the length of the ReputationUpdateLog stored on this instance of the ReputationMiningCycle contract
@@ -204,7 +217,7 @@ contract IReputationMiningCycle {
   /// @dev Only callable by colonyNetwork
   /// @dev Note that the same address might be present multiple times in `stakers` - this is acceptable, and indicates the
   /// same address backed the same hash multiple times with different entries.
-  function rewardStakersWithReputation(address[] stakers, address commonColonyAddress, uint reward, uint miningSkillId) public;
+  function rewardStakersWithReputation(address[] stakers, address commonColonyAddress, uint256 reward, uint miningSkillId) public;
 
   /// @notice Get the timestamp that the current reputation mining window opened
   function getReputationMiningWindowOpenTimestamp() public view returns (uint256 timestamp);

@@ -94,7 +94,7 @@ contract Colony is ColonyStorage, PatriciaTreeProofs {
 
     for (uint i = 0; i < _users.length; i++) {
       require(_amounts[i] >= 0, "colony-bootstrap-bad-amount-input");
-
+      
       token.transfer(_users[i], uint(_amounts[i]));
       IColonyNetwork(colonyNetworkAddress).appendReputationUpdateLog(_users[i], _amounts[i], domains[1].skillId);
     }
@@ -189,8 +189,7 @@ contract Colony is ColonyStorage, PatriciaTreeProofs {
     _;
   }
 
-  function verifyReputationProof(bytes key, bytes value, uint branchMask, bytes32[] siblings)  // solium-disable-line security/no-assign-params
-  public view
+  function verifyReputationProof(bytes key, bytes value, uint branchMask, bytes32[] siblings) public view
   stoppable
   verifyKey(key)
   returns (bool)
