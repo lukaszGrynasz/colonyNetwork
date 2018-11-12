@@ -156,13 +156,13 @@ contract("ColonyNetworkMining", accounts => {
       let noError = true;
       while (noError) {
         let transactionObject;
-        transactionObject = await client1.respondToBinarySearchForChallenge(); // eslint-disable-line no-await-in-loop
-        let tx = await web3GetTransactionReceipt(transactionObject.hash); // eslint-disable-line no-await-in-loop
+        transactionObject = await client1.respondToBinarySearchForChallenge();
+        let tx = await web3GetTransactionReceipt(transactionObject.hash);
         if (!tx.status) {
           noError = false;
         }
-        transactionObject = await client2.respondToBinarySearchForChallenge(); // eslint-disable-line no-await-in-loop
-        tx = await web3GetTransactionReceipt(transactionObject.hash); // eslint-disable-line no-await-in-loop
+        transactionObject = await client2.respondToBinarySearchForChallenge();
+        tx = await web3GetTransactionReceipt(transactionObject.hash);
         if (!tx.status) {
           noError = false;
         }
@@ -701,8 +701,8 @@ contract("ColonyNetworkMining", accounts => {
       const repCycle = await IReputationMiningCycle.at(addr);
       let entryNumber = await getValidEntryNumber(colonyNetwork, MAIN_ACCOUNT, "0x12345678", 1);
       for (let i = 1; i <= 12; i += 1) {
-        await repCycle.submitRootHash("0x12345678", 10, entryNumber); // eslint-disable-line no-await-in-loop
-        entryNumber = await getValidEntryNumber(colonyNetwork, MAIN_ACCOUNT, "0x12345678", entryNumber + 1); // eslint-disable-line no-await-in-loop
+        await repCycle.submitRootHash("0x12345678", 10, entryNumber);
+        entryNumber = await getValidEntryNumber(colonyNetwork, MAIN_ACCOUNT, "0x12345678", entryNumber + 1);
       }
       await checkErrorRevert(repCycle.submitRootHash("0x12345678", 10, entryNumber), "colony-reputation-mining-max-number-miners-reached");
     });
@@ -1574,7 +1574,7 @@ contract("ColonyNetworkMining", accounts => {
         const value = goodClient.reputations[key];
         const score = new BN(value.slice(2, 66), 16);
 
-        await badClient.insert(key, score, 0); // eslint-disable-line no-await-in-loop
+        await badClient.insert(key, score, 0);
       }
 
       righthash = await goodClient.getRootHash();
@@ -1979,7 +1979,7 @@ contract("ColonyNetworkMining", accounts => {
       assert(accounts.length >= 8, "Not enough accounts for test to run");
       const accountsForTest = accounts.slice(0, 8);
       for (let i = 0; i < 8; i += 1) {
-        await giveUserCLNYTokensAndStake(colonyNetwork, accountsForTest[i], DEFAULT_STAKE); // eslint-disable-line no-await-in-loop
+        await giveUserCLNYTokensAndStake(colonyNetwork, accountsForTest[i], DEFAULT_STAKE);
         // These have to be done sequentially because this function uses the total number of tasks as a proxy for getting the
         // right taskId, so if they're all created at once it messes up.
       }
@@ -2011,9 +2011,9 @@ contract("ColonyNetworkMining", accounts => {
       for (let i = 0; i < clients.length; i += 1) {
         // Doing these individually rather than in a big loop because with many instances of the EVM
         // churning away at once, I *think* it's slower.
-        await clients[i].addLogContentsToReputationTree(); // eslint-disable-line no-await-in-loop
-        await clients[i].submitRootHash(); // eslint-disable-line no-await-in-loop
-        await clients[i].submitJustificationRootHash(); // eslint-disable-line no-await-in-loop
+        await clients[i].addLogContentsToReputationTree();
+        await clients[i].submitRootHash();
+        await clients[i].submitJustificationRootHash();
         console.log(`Client ${i} of ${clients.length - 1} submitted JRH`); // eslint-disable-line no-console
       }
       await forwardTime(MINING_CYCLE_DURATION / 2, this);
@@ -2138,10 +2138,10 @@ contract("ColonyNetworkMining", accounts => {
             workerPayout: 1
           }
         );
-        await metaColony.finalizeTask(taskId); // eslint-disable-line no-await-in-loop
-        const nLogEntries = await inactiveRepCycle.getReputationUpdateLogLength(); // eslint-disable-line no-await-in-loop
-        const lastLogEntry = await inactiveRepCycle.getReputationUpdateLogEntry(nLogEntries - 1); // eslint-disable-line no-await-in-loop
-        const currentHashNNodes = await colonyNetwork.getReputationRootHashNNodes(); // eslint-disable-line no-await-in-loop
+        await metaColony.finalizeTask(taskId);
+        const nLogEntries = await inactiveRepCycle.getReputationUpdateLogLength();
+        const lastLogEntry = await inactiveRepCycle.getReputationUpdateLogEntry(nLogEntries - 1);
+        const currentHashNNodes = await colonyNetwork.getReputationRootHashNNodes();
         const nUpdates = lastLogEntry[4].add(lastLogEntry[5]).add(currentHashNNodes);
         // The total number of updates we expect is the nPreviousUpdates in the last entry of the log plus the number
         // of updates that log entry implies by itself, plus the number of decays (the number of nodes in current state)
@@ -2431,7 +2431,7 @@ contract("ColonyNetworkMining", accounts => {
       const nClients = Math.min(accounts.length, 7);
       // TODO: This test probably needs to be written more carefully to make sure all possible edge cases are dealt with
       for (let i = 0; i < nClients; i += 1) {
-        await giveUserCLNYTokensAndStake(colonyNetwork, accounts[i], DEFAULT_STAKE); // eslint-disable-line no-await-in-loop
+        await giveUserCLNYTokensAndStake(colonyNetwork, accounts[i], DEFAULT_STAKE);
         // These have to be done sequentially because this function uses the total number of tasks as a proxy for getting the
         // right taskId, so if they're all created at once it messes up.
       }
@@ -2463,8 +2463,8 @@ contract("ColonyNetworkMining", accounts => {
       for (let i = 0; i < clients.length; i += 1) {
         // Doing these individually rather than in a big loop because with many instances of the EVM
         // churning away at once, I *think* it's slower.
-        await clients[i].addLogContentsToReputationTree(); // eslint-disable-line no-await-in-loop
-        await clients[i].submitRootHash(); // eslint-disable-line no-await-in-loop
+        await clients[i].addLogContentsToReputationTree();
+        await clients[i].submitRootHash();
         console.log(`Client ${i} of ${clients.length - 1} submitted JRH`); // eslint-disable-line no-console
       }
       await forwardTime(MINING_CYCLE_DURATION / 2, this);
@@ -2474,7 +2474,7 @@ contract("ColonyNetworkMining", accounts => {
       let cycle = 0;
       while (nRemainingHashes > 1) {
         for (let i = 0; i < clients.length; i += 2 * 2 ** cycle) {
-          let [client1round] = await clients[i].getMySubmissionRoundAndIndex(); // eslint-disable-line no-await-in-loop
+          let [client1round] = await clients[i].getMySubmissionRoundAndIndex();
           client1round = new BN(client1round.toString());
           let client2round = new BN("-1");
           let client2idx = i;
@@ -2483,16 +2483,16 @@ contract("ColonyNetworkMining", accounts => {
             if (!clients[client2idx]) {
               break;
             }
-            [client2round] = await clients[client2idx].getMySubmissionRoundAndIndex(); // eslint-disable-line no-await-in-loop
+            [client2round] = await clients[client2idx].getMySubmissionRoundAndIndex();
             client2round = new BN(client2round.toString());
           }
-          await accommodateChallengeAndInvalidateHash(this, clients[i], clients[client2idx]); // eslint-disable-line no-await-in-loop
+          await accommodateChallengeAndInvalidateHash(this, clients[i], clients[client2idx]);
           // These could all be done simultaneously, but the one-liner with Promise.all is very hard to read.
           // It involved spread syntax and everything. If someone can come up with an easy-to-read version, I'll
           // be all for it
         }
         cycle += 1;
-        const nInvalidatedHashes = await repCycle.getNInvalidatedHashes(); // eslint-disable-line no-await-in-loop
+        const nInvalidatedHashes = await repCycle.getNInvalidatedHashes();
         nRemainingHashes = nSubmittedHashes.sub(nInvalidatedHashes).toNumber();
       }
       await repCycle.confirmNewHash(cycle);
@@ -2513,7 +2513,7 @@ contract("ColonyNetworkMining", accounts => {
             workerPayout: 1
           }
         );
-        await metaColony.finalizeTask(taskId); // eslint-disable-line no-await-in-loop
+        await metaColony.finalizeTask(taskId);
       }
       // Complete this reputation cycle
 
@@ -3114,7 +3114,7 @@ contract("ColonyNetworkMining", accounts => {
         const key = keys[i];
         const value = goodClient.reputations[key];
         const score = new BN(value.slice(2, 66), 16);
-        await badClient.insert(key, score, 0); // eslint-disable-line no-await-in-loop
+        await badClient.insert(key, score, 0);
       }
 
       await submitAndForwardTimeToDispute([goodClient, badClient], this);
@@ -3174,7 +3174,7 @@ contract("ColonyNetworkMining", accounts => {
             workerRating: 3
           }
         );
-        await metaColony.finalizeTask(taskId); // eslint-disable-line no-await-in-loop
+        await metaColony.finalizeTask(taskId);
       }
 
       await advanceTimeSubmitAndConfirmHash(this);
@@ -3197,7 +3197,7 @@ contract("ColonyNetworkMining", accounts => {
             workerRating: 3
           }
         );
-        await metaColony.finalizeTask(taskId); // eslint-disable-line no-await-in-loop
+        await metaColony.finalizeTask(taskId);
       }
 
       await advanceTimeSubmitAndConfirmHash(this);
@@ -3240,7 +3240,7 @@ contract("ColonyNetworkMining", accounts => {
                 workerRating: 3
               }
             );
-            await metaColony.finalizeTask(taskId); // eslint-disable-line no-await-in-loop
+            await metaColony.finalizeTask(taskId);
           }
 
           await advanceTimeSubmitAndConfirmHash(this);
