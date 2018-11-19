@@ -2074,7 +2074,7 @@ contract("ColonyNetworkMining", accounts => {
             // This is the right line
             // agreeStateBranchMask.toString(),
             // This is the wrong line
-            0,
+            123456,
             goodClient.justificationHashes[`0x${new BN(firstDisagreeIdx).toString(16, 64)}`].justUpdatedProof.nNodes.toString(),
             disagreeStateBranchMask.toString(),
             // This is the correct line, for future reference
@@ -2106,7 +2106,7 @@ contract("ColonyNetworkMining", accounts => {
             agreeStateBranchMask.toString(),
             goodClient.justificationHashes[`0x${new BN(firstDisagreeIdx).toString(16, 64)}`].justUpdatedProof.nNodes.toString(),
             // This is the wrong line
-            0,
+            123456,
             // This is the right line
             // disagreeStateBranchMask.toString(),
             // This is the correct line, for future reference
