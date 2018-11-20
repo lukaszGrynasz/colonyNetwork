@@ -757,7 +757,7 @@ contract("Colony Funding", accounts => {
       const taskId = await setupRatedTask({
         colonyNetwork,
         colony,
-        skill: id.toNumber()
+        skillId: id.toNumber()
       });
       await colony.finalizeTask(taskId);
 
@@ -847,7 +847,7 @@ contract("Colony Funding", accounts => {
         colonyNetwork,
         colony: newColony,
         token: newToken,
-        domain: domainCount.toNumber()
+        domainId: domainCount.toNumber()
       });
       await newColony.finalizeTask(taskId);
 
